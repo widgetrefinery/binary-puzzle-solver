@@ -1,0 +1,21 @@
+{
+	"name": "binary-puzzle-solver",
+	"version": "1.0.0",
+	"dependencies": {
+		"mithril": "1.1.1"
+	},
+	"devDependencies": {
+		"chai": "4.0.2",
+		"del": "3.0.0",
+		"files-exist": "1.0.2",
+		"gulp": "3.9.1",
+		"gulp-clean-css": "3.4.2",
+		"gulp-concat": "2.6.1",
+		"gulp-htmlmin": "3.0.0",
+		"gulp-sass": "3.1.0",
+		"gulp-sourcemaps": "2.6.0",
+		"gulp-uglify": "3.0.0",
+		"mocha": "3.4.2",
+		"webpack-stream": "3.2.0"
+	}
+}

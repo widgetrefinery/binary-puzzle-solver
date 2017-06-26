@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+<head>
+	<title>Binary Puzzle Solver - Unit Tests</title>
+	<link href="lib.css" rel="stylesheet" />
+</head>
+<body>
+	<div id="mocha"></div>
+	<script src="lib.js"></script>
+	<script>
+		mocha.setup("bdd");
+	</script>
+	<script src="app.js"></script>
+	<script>
+		mocha.checkLeaks();
+		mocha.run();
+	</script>
+</body>
+</html>
