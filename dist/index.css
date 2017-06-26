@@ -1,0 +1,1 @@
+*{box-sizing:inherit;margin:0;padding:0}html{box-sizing:border-box;font-size:24px;line-height:1rem}.board span{border:1px solid #000;cursor:pointer;display:inline-block;height:1.5rem;padding-top:.25rem;text-align:center;vertical-align:top;width:1.5rem}.board span:hover{background-color:#ff0}.board span.active{color:red}
