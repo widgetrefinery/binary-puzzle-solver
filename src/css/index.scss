@@ -1,3 +1,19 @@
+/*** color scheme *********************/
+$border: #181a1f;
+$text-bg: #21252b;
+$text-fg: #abb2bf;
+$link-fg: #56b6c2;
+$input-regular-bg: #393e49;
+$input-regular-fg: #9da5b4;
+$input-focus-bg: #3e4350;
+$input-focus-fg: #d7dae0;
+$input-active-bg: #4d78cc;
+$input-active-fg: #fff6f2;
+$cell-regular-bg: #282c34;
+$cell-focus-bg: #5c6370;
+$cell-solved-fg: #e06c75;
+$cell-user-fg: #d19a66;
+/*** baseline *************************/
 * {
 	box-sizing: inherit;
 	margin: 0;
@@ -5,26 +21,138 @@
 }
 
 html {
+	background-color: $text-bg;
 	box-sizing: border-box;
-	font-size: 24px;
+	color: $text-fg;
+	font-family: verdana,arial, helvetica, sans-serif;
+	font-size: 16px;
 	line-height: 1rem;
 }
 
-.board span {
-	border: 1px solid black;
-	cursor: pointer;
-	display: inline-block;
-	height: 1.5rem;
-	padding-top: 0.25rem;
+main {
+	margin: 1rem auto;
+	max-width: 40rem;
+}
+
+main > * {
+	margin-bottom: 1rem;
+}
+/*** user controls ********************/
+fieldset {
+	border: none;
 	text-align: center;
-	vertical-align: top;
-	width: 1.5rem;
+	white-space: nowrap;
 }
 
-.board span:hover {
-	background-color: #ff0;
+select {
+	background-color: $input-regular-bg;
+	border: 1px solid $border;
+	border-radius: 4px;
+	color: $input-regular-fg;
+	font-size: inherit;
+	font-family: inherit;
+	padding: 0.1rem 0.2rem;
+
+	&:active,
+	&:focus,
+	&:hover {
+		background-color: $input-focus-bg;
+		color: $input-focus-fg;
+		outline: none;
+	}
 }
 
-.board span.active {
-	color: #f00;
+.btn-group {
+	margin-left: 1rem;
+}
+
+button {
+	background-color: $input-regular-bg;
+	border: 1px solid $border;
+	border-left-width: 0;
+	border-radius: 0;
+	color: $input-regular-fg;
+	cursor: pointer;
+	font-size: inherit;
+	font-family: inherit;
+	padding: 0.1rem 0.2rem;
+
+	&:first-child {
+		border-left-width: 1px;
+		border-top-left-radius: 4px;
+		border-bottom-left-radius: 4px;
+	}
+
+	&:last-child {
+		border-top-right-radius: 4px;
+		border-bottom-right-radius: 4px;
+	}
+
+	&:hover {
+		background-color: $input-focus-bg;
+		color: $input-focus-fg;
+	}
+
+	&:active,
+	&:focus {
+		background-color: $input-active-bg;
+		color: $input-active-fg;
+		outline: none;
+	}
+}
+/*** puzzle board *********************/
+.board {
+	border: 2px solid $border;
+	border-collapse: collapse;
+	margin: 0 auto 1rem;
+	table-layout: fixed;
+
+	td {
+		background-color: $cell-regular-bg;
+		border: 1px solid $border;
+		cursor: pointer;
+		font-size: 1.5rem;
+		height: 2rem;
+		min-width: 2rem;
+		text-align: center;
+		vertical-align: middle;
+
+		&:hover {
+			background-color: $cell-focus-bg;
+		}
+
+		&.solved {
+			color: $cell-solved-fg;
+		}
+
+		&.user {
+			color: $cell-user-fg;
+		}
+	}
+
+	&.odd td:nth-child(2n) {
+		border-left-width: 2px;
+	}
+
+	&.even td:nth-child(2n+1) {
+		border-left-width: 2px;
+	}
+
+	tr:nth-child(2n+1) td {
+		border-top-width: 2px;
+	}
+}
+/*** text elements ********************/
+a,
+a:active,
+a:hover,
+a:link,
+a:visited {
+	color: $link-fg;
+	text-decoration: none;
+}
+
+li {
+	margin-left: 2rem;
+	padding-left: 0.5rem;
 }

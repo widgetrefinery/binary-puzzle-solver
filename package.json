@@ -15,7 +15,13 @@
 		"gulp-sass": "3.1.0",
 		"gulp-sourcemaps": "2.6.0",
 		"gulp-uglify": "3.0.0",
+		"jsdoc": "3.4.3",
 		"mocha": "3.4.2",
 		"webpack-stream": "3.2.0"
+	},
+	"scripts": {
+		"build": "gulp",
+		"doc": "jsdoc -d doc src/js",
+		"test": "mocha test/js/index.js"
 	}
 }

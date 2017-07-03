@@ -1,189 +1,147 @@
 var assert = require("chai").assert;
-var config = require("../../src/js/config.js");
-var cells = require("../../src/js/cells.js");
+var Cells = require("../../src/js/cells.js");
+var Config = require("../../src/js/config.js");
 
-var unknown = config.cell.unknown;
-var zero = config.cell.zero;
-var one = config.cell.one;
+var nilFlag = Config.cellFlag.nil;
+var userFlag = Config.cellFlag.user;
+var solvedFlag = Config.cellFlag.solved;
+
+var unknownState = Config.cellState.unknown;
+var zeroState = Config.cellState.zero;
+var oneState = Config.cellState.one;
 
 describe("cells", function() {
-	it("#get", function() {
-		var c = cells.create(2);
-		for (var i = 0; i < c.values.length; i++) {
-			c.values[i].value = i;
-		}
-
-		assert.strictEqual(cells.get(c, -1, -1), undefined);
-		assert.strictEqual(cells.get(c, 0, -1), undefined);
-		assert.strictEqual(cells.get(c, 2, -1), undefined);
-
-		assert.strictEqual(cells.get(c, -1, 0), undefined);
-		assert.strictEqual(cells.get(c, 2, 0), undefined);
-
-		assert.strictEqual(cells.get(c, -1, 2), undefined);
-		assert.strictEqual(cells.get(c, 0, 2), undefined);
-		assert.strictEqual(cells.get(c, 2, 2), undefined);
-
-		assert.strictEqual(cells.get(c, 0, 0), c.values[0]);
-		assert.strictEqual(cells.get(c, 1, 0), c.values[1]);
-		assert.strictEqual(cells.get(c, 0, 1), c.values[2]);
-		assert.strictEqual(cells.get(c, 1, 1), c.values[3]);
+	it("~at", function() {
+		var cells = Cells.create(2);
+		assert.strictEqual(Cells.at(cells, 0, 0), cells.all[0]);
+		assert.strictEqual(Cells.at(cells, 1, 0), cells.all[1]);
+		assert.strictEqual(Cells.at(cells, 0, 1), cells.all[2]);
+		assert.strictEqual(Cells.at(cells, 1, 1), cells.all[3]);
 	});
 
-	it("#value", function() {
-		var c = cells.create(2);
-		for (var i = 0; i < c.values.length; i++) {
-			c.values[i].value = i;
-		}
+	it("~get", function() {
+		var cells = Cells.create(2);
+		cells.all[0].state = unknownState;
+		cells.all[1].state = zeroState;
+		cells.all[2].state = oneState;
+		cells.all[3].state = unknownState;
 
-		assert.strictEqual(cells.value(c, -1, -1), unknown);
-		assert.strictEqual(cells.value(c, 0, -1), unknown);
-		assert.strictEqual(cells.value(c, 2, -1), unknown);
-
-		assert.strictEqual(cells.value(c, -1, 0), unknown);
-		assert.strictEqual(cells.value(c, 2, 0), unknown);
-
-		assert.strictEqual(cells.value(c, -1, 2), unknown);
-		assert.strictEqual(cells.value(c, 0, 2), unknown);
-		assert.strictEqual(cells.value(c, 2, 2), unknown);
-
-		assert.strictEqual(cells.value(c, 0, 0), 0);
-		assert.strictEqual(cells.value(c, 1, 0), 1);
-		assert.strictEqual(cells.value(c, 0, 1), 2);
-		assert.strictEqual(cells.value(c, 1, 1), 3);
+		assert.strictEqual(Cells.get(cells, 0, 0), unknownState);
+		assert.strictEqual(Cells.get(cells, 1, 0), zeroState);
+		assert.strictEqual(Cells.get(cells, 0, 1), oneState);
+		assert.strictEqual(Cells.get(cells, 1, 1), unknownState);
 	});
 
-	it("#toggle", function() {
-		var c = cells.create(2);
-		check(unknown, unknown, unknown, unknown);
-		cells.toggle(c, 1, 0);
-		check(unknown, zero, unknown, unknown);
-		cells.toggle(c, 1, 0);
-		check(unknown, one, unknown, unknown);
+	it("~set", function() {
+		var cells = Cells.create(2);
+		Cells.set(cells, 1, 0, zeroState);
+		Cells.set(cells, 0, 1, oneState);
 
-		cells.toggle(c, 1, 0);
-		check(unknown, unknown, unknown, unknown);
-		cells.toggle(c, 1, 0);
-		check(unknown, zero, unknown, unknown);
-		cells.toggle(c, 1, 0);
-		check(unknown, one, unknown, unknown);
-
-		cells.toggle(c, 0, 1);
-		check(unknown, one, zero, unknown);
-
-		function check(value0, value1, value2, value3) {
-			assert.strictEqual(cells.value(c, 0, 0), value0);
-			assert.strictEqual(cells.value(c, 1, 0), value1);
-			assert.strictEqual(cells.value(c, 0, 1), value2);
-			assert.strictEqual(cells.value(c, 1, 1), value3);
-		}
+		checkCell(cells, 0, 0, unknownState, nilFlag);
+		checkCell(cells, 1, 0, zeroState, solvedFlag);
+		checkCell(cells, 0, 1, oneState, solvedFlag);
+		checkCell(cells, 1, 1, unknownState, nilFlag);
+		assert.deepEqual(cells.solved, [cells.all[1], cells.all[2]]);
 	});
 
-	it("#infer", function() {
-		checkNeighbors(
-			0, 1, // left2
-			1, 1, // left1
-			2, 1 // cell
-		);
-		checkNeighbors(
-			0, 1, // left1
-			2, 1, // right1
-			1, 1 // cell
-		);
-		checkNeighbors(
-			1, 1, // right1
-			2, 1, // right2
-			0, 1 // cell
-		);
-		checkNeighbors(
-			1, 0, // above2
-			1, 1, // above1
-			1, 2 // cell
-		);
-		checkNeighbors(
-			1, 0, // above1
-			1, 2, // below1
-			1, 1 // cell
-		);
-		checkNeighbors(
-			1, 1, // below1
-			1, 2, // below2
-			1, 0 // cell
-		);
+	it("~rotate", function() {
+		var cells = Cells.create(2);
 
-		function checkNeighbors(firstX, firstY, secondX, secondY, cellX, cellY) {
-			var c = cells.create(3);
-			checkSingleCase(c,
-				firstX, firstY, unknown,
-				secondX, secondY, unknown,
-				cellX, cellY, unknown);
-			checkSingleCase(c,
-				firstX, firstY, zero,
-				secondX, secondY, unknown,
-				cellX, cellY, unknown);
-			checkSingleCase(c,
-				firstX, firstY, unknown,
-				secondX, secondY, one,
-				cellX, cellY, unknown);
-			checkSingleCase(c,
-				firstX, firstY, one,
-				secondX, secondY, zero,
-				cellX, cellY, unknown);
-			checkSingleCase(c,
-				firstX, firstY, zero,
-				secondX, secondY, zero,
-				cellX, cellY, one);
-			checkSingleCase(c,
-				firstX, firstY, one,
-				secondX, secondY, one,
-				cellX, cellY, zero);
-		}
+		// rotate the cell at (1,0)
+		Cells.rotate(cells, 1, 0);
+		checkCell(cells, 1, 0, zeroState, userFlag);
+		Cells.rotate(cells, 1, 0);
+		checkCell(cells, 1, 0, oneState, userFlag);
+		Cells.rotate(cells, 1, 0);
+		checkCell(cells, 1, 0, unknownState, nilFlag);
+		Cells.rotate(cells, 1, 0);
+		checkCell(cells, 1, 0, zeroState, userFlag);
+		Cells.rotate(cells, 1, 0);
+		checkCell(cells, 1, 0, oneState, userFlag);
 
-		function checkSingleCase(c,
-			firstX, firstY, firstValue,
-			secondX, secondY, secondValue,
-			cellX, cellY, inferResult) {
-			cells.get(c, firstX, firstY).value = firstValue;
-			cells.get(c, secondX, secondY).value = secondValue;
-			cells.get(c, cellX, cellY).value = unknown;
-			assert.strictEqual(cells.infer(c, cellX, cellY), inferResult);
-			assert.strictEqual(cells.value(c, cellX, cellY), inferResult);
-		}
+		// rotate the cell at (1,1)
+		Cells.rotate(cells, 1, 1);
+		checkCell(cells, 1, 1, zeroState, userFlag);
+
+		// check cells
+		checkCell(cells, 0, 0, unknownState, nilFlag);
+		checkCell(cells, 1, 0, oneState, userFlag);
+		checkCell(cells, 0, 1, unknownState, nilFlag);
+		checkCell(cells, 1, 1, zeroState, userFlag);
 	});
 
-	it("#hasNeighbor", function() {
-		var c = cells.create(3);
-		assert.strictEqual(cells.hasNeighbor(c, 1, 1), false);
+	it("~clearSolvedFlag", function() {
+		var cells = Cells.create(2);
+		Cells.rotate(cells, 1, 0);
+		Cells.set(cells, 0, 1, oneState);
+		checkCell(cells, 0, 0, unknownState, nilFlag);
+		checkCell(cells, 1, 0, zeroState, userFlag);
+		checkCell(cells, 0, 1, oneState, solvedFlag);
+		checkCell(cells, 1, 1, unknownState, nilFlag);
+		assert.deepEqual(cells.solved, [cells.all[2]]);
 
-		cells.get(c, 0, 0).value = zero;
-		assert.strictEqual(cells.hasNeighbor(c, 1, 1), false);
+		Cells.clearSolvedFlag(cells);
+		checkCell(cells, 0, 0, unknownState, nilFlag);
+		checkCell(cells, 1, 0, zeroState, userFlag);
+		checkCell(cells, 0, 1, oneState, nilFlag);
+		checkCell(cells, 1, 1, unknownState, nilFlag);
+		assert.deepEqual(cells.solved, []);
+	});
 
-		cells.get(c, 0, 0).value = unknown;
-		cells.get(c, 1, 0).value = zero;
-		assert.strictEqual(cells.hasNeighbor(c, 1, 1), true);
+	it("~reset", function() {
+		var cells = Cells.create(2);
+		Cells.rotate(cells, 1, 0);
+		Cells.set(cells, 0, 1, oneState);
+		checkCell(cells, 0, 0, unknownState, nilFlag);
+		checkCell(cells, 1, 0, zeroState, userFlag);
+		checkCell(cells, 0, 1, oneState, solvedFlag);
+		checkCell(cells, 1, 1, unknownState, nilFlag);
+		assert.deepEqual(cells.solved, [cells.all[2]]);
 
-		cells.get(c, 1, 0).value = unknown;
-		cells.get(c, 2, 0).value = zero;
-		assert.strictEqual(cells.hasNeighbor(c, 1, 1), false);
+		Cells.reset(cells);
+		checkCell(cells, 0, 0, unknownState, nilFlag);
+		checkCell(cells, 1, 0, zeroState, userFlag);
+		checkCell(cells, 0, 1, unknownState, nilFlag);
+		checkCell(cells, 1, 1, unknownState, nilFlag);
+		assert.deepEqual(cells.solved, []);
+	});
 
-		cells.get(c, 2, 0).value = unknown;
-		cells.get(c, 0, 1).value = zero;
-		assert.strictEqual(cells.hasNeighbor(c, 1, 1), true);
+	it("~import", function() {
+		var cells = Cells.create(2);
 
-		cells.get(c, 0, 1).value = unknown;
-		cells.get(c, 2, 1).value = zero;
-		assert.strictEqual(cells.hasNeighbor(c, 1, 1), true);
+		// input data matches board size
+		Cells.import(cells,
+			" 0\n" +
+			"1 ");
+		checkCell(cells, 0, 0, unknownState, nilFlag);
+		checkCell(cells, 1, 0, zeroState, userFlag);
+		checkCell(cells, 0, 1, oneState, userFlag);
+		checkCell(cells, 1, 1, unknownState, nilFlag);
 
-		cells.get(c, 2, 1).value = unknown;
-		cells.get(c, 0, 2).value = zero;
-		assert.strictEqual(cells.hasNeighbor(c, 1, 1), false);
+		// input data does not match board size
+		Cells.import(cells,
+			"1\n" +
+			" 01\n" +
+			"10"
+		);
+		checkCell(cells, 0, 0, oneState, userFlag);
+		checkCell(cells, 1, 0, unknownState, nilFlag);
+		checkCell(cells, 0, 1, unknownState, nilFlag);
+		checkCell(cells, 1, 1, zeroState, userFlag);
+	});
 
-		cells.get(c, 0, 2).value = unknown;
-		cells.get(c, 1, 2).value = zero;
-		assert.strictEqual(cells.hasNeighbor(c, 1, 1), true);
-
-		cells.get(c, 1, 2).value = unknown;
-		cells.get(c, 2, 2).value = zero;
-		assert.strictEqual(cells.hasNeighbor(c, 1, 1), false);
+	it("~export", function() {
+		var cells = Cells.create(2);
+		Cells.set(cells, 1, 0, zeroState);
+		Cells.set(cells, 0, 1, oneState);
+		assert.strictEqual(Cells.export(cells),
+			" 0\n" +
+			"1 ");
 	});
 });
+
+function checkCell(cells, x, y, state, flags) {
+	var cell = Cells.at(cells, x, y);
+	assert.strictEqual(cell.state, state);
+	assert.strictEqual(cell.flags, flags);
+}
